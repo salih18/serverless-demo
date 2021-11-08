@@ -1,0 +1,19 @@
+{
+  "name": "serverless-http-api-typescript",
+  "description": "",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "sls offline -s dev"
+  },
+  "dependencies": {
+    "graphql": "^15.7.0",
+    "graphql-request": "^3.6.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.61",
+    "serverless": "^1.78.1",
+    "serverless-offline": "^8.2.0",
+    "serverless-plugin-typescript": "^1.1.9",
+    "typescript": "^3.9.7"
+  }
+}

@@ -1,0 +1,27 @@
+org: salihsert18
+app: my-typescript-http-api-app
+service: my-typescript-http-api-app
+
+# frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: '20201221'
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
+  calculate:
+    handler: handler.calculate
+    events:
+      - httpApi:
+          path: /
+          method: post
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
