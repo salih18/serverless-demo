@@ -6,37 +6,17 @@ import {
 
 import { GraphQLClient } from "graphql-request";
 
-// export const hello: APIGatewayProxyHandler = async (
-//   _event: APIGatewayProxyEvent
-// ): Promise<APIGatewayProxyResult> => {
-//   try {
-//     const response = {
-//       statusCode: 200,
-//       body: "Heelo",
-//     };
-//     return response;
-//   } catch (error) {
-//     return {
-//       statusCode: 500,
-//       body: "An error occured",
-//     };
-//   }
-// };
-
 export const calculate: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
     const requestBody = event.body;
     const parsedBody = JSON.parse(requestBody || "");
+    console.log("🚀 ~ file: handler.ts ~ line 15 ~ parsedBody", parsedBody);
 
     const endpoint = "https://api.spacex.land/graphql/";
 
     const graphQLClient = new GraphQLClient(endpoint);
-
-    const variables = {
-      id: parsedBody?.id,
-    };
 
     const query = /* GraphQL */ `
       query getLaunch($id: ID!) {
@@ -90,11 +70,39 @@ export const calculate: APIGatewayProxyHandler = async (
       };
     }
 
-    const data = await graphQLClient.request<TData>(query, variables);
-    // console.log(JSON.stringify(data, undefined, 2));
+    const promises = parsedBody.ids.map(async (id) => {
+      return await graphQLClient.request<TData>(query, {
+        id,
+      });
+    });
+
+    const results = await Promise.allSettled<PromiseSettledResult<any>>(
+      promises
+    );
+
+    const launches = results.map((l: any) => {
+      if (l.status === "fulfilled") {
+        return l.value.launch;
+      }
+    });
+
+    const totalMass = launches.reduce((sum, launch) => {
+      sum =
+        sum +
+        launch?.rocket?.rocket?.mass?.kg +
+        launch?.rocket?.rocket?.first_stage?.fuel_amount_tons;
+      return sum;
+    }, 0);
+
+    const totalConsumption = 1 * 15 * totalMass * 1.35 * 10;
+
     const response = {
       statusCode: 200,
-      body: JSON.stringify(data, undefined, 2),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+      body: JSON.stringify({ totalConsumption }, undefined, 2),
     };
     return response;
   } catch (error) {

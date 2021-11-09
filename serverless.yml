@@ -10,18 +10,13 @@ provider:
   lambdaHashingVersion: '20201221'
 
 functions:
-  hello:
-    handler: handler.hello
-    events:
-      - httpApi:
-          path: /
-          method: get
   calculate:
     handler: handler.calculate
     events:
       - httpApi:
           path: /
           method: post
+          cors: true 
 plugins:
   - serverless-plugin-typescript
   - serverless-offline
